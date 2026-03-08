@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 1</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+</head>
+<body>
+
+    <div class="modal" id = "introModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-center fw-bold w-100 fs-2">📊 Chicago Crime Statistics <br> Data Visualization</h5>
+            
+            </div>
+            <div class="modal-body bg-light">
+                <div class = "instructions bg-light p-3 rounded-3">
+                    <h5 class = "modal-features text-center fw-bold fs-3">How to Use: </h5>
+                    <ul class = "list-unstyled ms-3 fs-3">
+                        <li>
+                            <strong> 🔍 Filter: </strong> Locate specific crimes in the legend next to the chart
+                        </li>
+                        <li>
+                            <strong> 🕹️ Toggle: </strong> Click the checkbox to add or remove data lines
+                        </li>
+                        <li>
+                            <strong> 🎯 Focus: </strong> Click on a line in the graph to view its trend
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip" style="display:none"></div> 
+    <div class="container"> <!-- Centers content and sets max width -->
+        <h1>Chicago Crime Trends by Type, 2001–2025</h1>
+        <h5>By Anoushka Arora, Omeed Zolali, and William Amorosi </h5>
+        <div id="vis"></div> <!--  Will hold our visualization (SVG) -->
+
+        <div class="project-description">
+            <h2>Introduction</h2>
+            <p>
+              In this assignment, we chose to explore the
+              <a href="https://data.cityofchicago.org/stories/s/Crimes-2001-to-present-Dashboard/5cd6-ry5g">
+                Chicago Crimes
+              </a>
+              dataset, which contains reported crimes categorized by location, description, and date of incident.
+              For our visualization, we chose to focus on the variables <strong>date</strong> and <strong>type</strong>
+              to gain insight into whether the decrease in reported crimes in Chicago is true across every type of crime.
+              Our visualization is a line chart displaying the number of reports for different crime types in Chicago for
+              every year from 2001 to 2025. Each line on the chart represents a different type of crime, such as
+              Battery or Theft, and each data point represents the number of reports that crime had in that year.
+            </p>
+          
+            <h2>Design Rationale</h2>
+            <p>
+              In our visualization, we implemented the following features. 
+              
+              <ul>
+                <li>A tooltip that appears when hovering over any given line</li>
+                <li>Filtering using the legend boxes, which provides a way to select and disable lines on the graph</li>
+                <li>A selection feature, where users can click on a line in the graph and have it display individually</li>
+              </ul>
+
+              The tooltip provides insight into the peak number of incidents for that crime in a given year, the most recent year’s
+              reports for that crime, and the percentage change from the first reported year to the last reported year.
+            </p>
+           
+            <p>
+              Initially, we thought it would be useful to click on individual lines to view a specific crime’s trends over
+              the years. However, after plotting the data, it became clear that many of the lines overlapped near the bottom
+              of the chart, which made clicking a specific line impractical if implemented on its own. As a result, we
+              supplemented this feature with filtering by turning the boxes in the legend into buttons that remove and add
+              their respective line from the chart. For additional clarity, crimes that are currently removed from the chart
+              are colored grey to show they are turned off.
+            </p>
+            <p>
+              To further account for the difficulty in viewing trends for lesser reported crimes, we added dynamic axis scaling, which automatically
+              sets the maximum range of the y-axis to the highest value among the currently activated lines. This allows the chart
+              to zoom in when viewing less frequently reported crimes, making those trends easier to examine.
+            </p>
+            <p>
+              We added tooltips to further enhance readability. When hovering over a line, users see a tooltip that displays
+              the crime type associated with that line, along with several useful metrics that help communicate the crime’s
+              overall trend. We also added grid lines to make it easier to read where each point falls on the y-axis.
+            </p>
+            <p>
+              To make the visualization easier to use, we included a dismissible text box that appears when the page first loads.
+              This box explains how to toggle lines and how the tooltip interaction works.
+            </p>
+            <p>
+              Finally, we used the legend itself to encode additional information. The legend items are ordered from most to least
+              total reports, allowing users to quickly identify which crimes were more frequently reported across the full time range.
+              We felt this was an intuitive design choice, especially since the line chart uses the same color gradient, so we did not
+              explicitly state this on the page.
+            </p>
+          
+            <h2>Development Process</h2>
+            <p>
+              During the first stage of development, we ran into issues with the size of the full dataset, which contained roughly
+              8 million rows and about 10 columns. This caused the live server to break when attempting to load the data. However,
+              our visualization did not require the details of each specific crime report—only yearly totals grouped by crime type.
+              This gave us a way to significantly reduce the size of the working dataset.
+            </p>
+            <p>
+              To solve this, we wrote a script (<code>csv_grouper.py</code>) that reorganized the data into a new CSV containing only
+              the total reports for each crime by year, rather than a row for every individual report. This reduced the CSV to about
+              300 rows and 3 columns, making it much easier to work with. We also grouped together redundant crime categories to make
+              color-coding in the legend more manageable. For example, crimes labeled <code>CRIM SEXUAL ASSAULT</code>,
+              <code>CRIMINAL SEXUAL ASSAULT</code>, and <code>SEX OFFENSE</code> were grouped into one category labeled
+              <strong>Criminal Sexual Assault</strong>. We also removed the category <code>DOMESTIC ABUSE</code>, because it had only
+              one report across the entire dataset and was considered an outlier.
+            </p>
+            <p>
+              For the visualization itself, we divided the work into three sections: building the initial non-interactive line chart,
+              implementing the ability to select and deselect lines on the graph, and adding tools to highlight specific lines with
+              tooltips.
+            </p>
+            <p>
+              <strong>William</strong> worked on cleaning the initial dataset and building the non-interactive line chart. He wrote a
+              Python script using pandas to process the original CSV, and after generating the grouped dataset, he manually removed
+              obvious outlier categories. For the line chart, he incorporated the function structure from lab 4/5 for updating axes
+              and adding a legend to the visualization. The most difficult part was the legend, as everything on the page needed to
+              be rescaled to prevent it from being cut off. It was also difficult to properly order the legend. The default ordering
+              in the CSV was mostly alphabetical, but we felt it made more sense to order it by quantity of reports. This allowed the
+              legend itself to communicate information, since it is intuitive to read higher-listed items as more frequent crimes. 
+              Incorporating these changes took about five to six hours, reflecting William's ability to effectively collaborate with others 
+              and lay the groundwork for a visualization that is easy to build upon. 
+            </p>
+            <p>
+              <strong>Anoushka</strong> worked on the selection and deselection of crimes on the chart, as well as the tooltip used to
+              convey information about the trends of a highlighted crime. Adding selection and deselection required modifying functions
+              that update the axes, update the visualization, and add the legend. Within the <code>addLegend</code> function, event
+              handling was added to the boxes to add and remove crimes from the hidden set when clicked. This was paired with changing
+              the color of the legend box from colored to grey and back again. After the legend updates, <code>updateAxes</code> and
+              <code>updateVis</code> are called, and those functions were modified to account for all crimes in the hidden set when
+              drawing lines and setting axes. The most difficult part of implementing this feature was figuring out the event flow and
+              identifying which functions needed to be changed, which took around three hours. The tooltip was less difficult to
+              implement because the groundwork had already been laid in lab 4/5, but Anoushka extended it by placing the metrics in a
+              styled <code>div</code>. This took about an hour to gather the correct information for the desired metrics and another
+              hour to style.
+            </p>
+            <p>
+              <strong>Omeed</strong> focused on improving visual clarity and implementing data filtering through a “color switcher”
+              mode. This involved creating a global boolean state to toggle the visualization between a multi-colored chart and a
+              grey-scale highlight mode where specific lines stand out in color when hovered over. To implement this,
+              <code>setupSelector()</code> was modified with an event listener that changes the boolean value and then calls
+              <code>addVis()</code> and <code>addLegend()</code>. Within these functions, ternary operators were used to dynamically
+              adjust the stroke colors of both the chart lines and the legend markers. This portion was fairly straightforward because
+              it relied on programming principles familiar from other languages. To enable specific line highlighting, event listeners
+              for <code>mouseover</code> and <code>mouseout</code> were added, using class-based selection and the <code>this</code>
+              keyword to isolate individual data lines. This part was more difficult due to Omeed’s limited JavaScript experience and
+              the challenge of understanding how to isolate data. Additionally, Bootstrap was used to integrate a modal for user
+              onboarding and a toggle button for the view modes. While the toggle button was eventually replaced with Anoushka’s legend-based
+              filtering system in the final version, it helped establish some foundational aspects of what should be included in the
+              visualization. The implementation of these features took roughly five hours and reflected a strong effort to improve the
+              UI design of the app using JavaScript event handling, new frameworks, and feedback from the team.
+            </p>
+          
+            <h2>Dataset</h2>
+            <p>
+              The full dataset can be found here:
+              <a href="https://data.cityofchicago.org/stories/s/Crimes-2001-to-present-Dashboard/5cd6-ry5g">
+                Chicago Crimes Dataset
+              </a>.
+            </p>
+            <p>
+              The data records every reported crime in Chicago from 2001 to February 28, 2026, at the time of writing.
+              The dataset excludes murders that have data for each victim. The data was collected using the Chicago Police
+              Department’s CLEAR system.
+            </p>
+        </div>
+    </div>
+
+    <!-- Load D3.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
